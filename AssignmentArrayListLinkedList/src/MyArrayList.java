@@ -3,17 +3,20 @@ import java.util.Iterator;
 public class MyArrayList<T> implements MyList<T> {
     private Object[] elements;
     private int size;
-    private static final int INITIAL_CAPACITY = 10;
+    private static final int capacity = 20;
 
     public MyArrayList() {
-        elements = new Object[INITIAL_CAPACITY];
+        elements = new Object[capacity];
         size = 0;
     }
 
     private void ensureCapacity() {
         if (size >= elements.length) {
-            Object[] newArr = new Object[elements.length * 2];
-            System.arraycopy(elements, 0, newArr, 0, elements.length);
+            int newCapacity = elements.length * 2;
+            Object[] newArr = new Object[newCapacity];
+            for (int i = 0; i < size; i++) {
+                newArr[i] = elements[i];
+            }
             elements = newArr;
         }
     }
@@ -34,10 +37,20 @@ public class MyArrayList<T> implements MyList<T> {
     public void add(int index, T item) {
         if (index < 0 || index > size) throw new IndexOutOfBoundsException();
         ensureCapacity();
-        System.arraycopy(elements, index, elements, index + 1, size - index);
-        elements[index] = item;
+        Object[] newArr = new Object[size + 1];
+        for (int i = 0; i < newArr.length; i++) {
+            if (i < index) {
+                newArr[i] = elements[i];
+            } else if (i == index) {
+                newArr[i] = item;
+            } else {
+                newArr[i] = elements[i - 1];
+            }
+        }
+        elements = newArr;
         size++;
     }
+
 
     @Override
     public void addFirst(T item) {
@@ -68,9 +81,15 @@ public class MyArrayList<T> implements MyList<T> {
     @Override
     public void remove(int index) {
         checkIndex(index);
-        System.arraycopy(elements, index + 1, elements, index, size - index - 1);
-        elements[--size] = null;
+
+        for (int i = index; i < size - 1; i++) {
+            elements[i] = elements[i + 1];
+        }
+
+        elements[size - 1] = null;
+        size--;
     }
+
 
     @Override
     public void removeFirst() {
@@ -99,19 +118,28 @@ public class MyArrayList<T> implements MyList<T> {
 
     @Override
     public int indexOf(Object object) {
-        for (int i = 0; i < size; i++) {
-            if (elements[i].equals(object)) return i;
+        int i = 0;
+        while (i < size) {
+            if (elements[i].equals(object)) {
+                return i;
+            }
+            i++;
         }
         return -1;
     }
 
     @Override
     public int lastIndexOf(Object object) {
-        for (int i = size - 1; i >= 0; i--) {
-            if (elements[i].equals(object)) return i;
+        int i = size - 1;
+        while (i >= 0) {
+            if (elements[i].equals(object)) {
+                return i;
+            }
+            i--;
         }
         return -1;
     }
+
 
     @Override
     public boolean exists(Object object) {
